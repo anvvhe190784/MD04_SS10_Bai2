@@ -30,6 +30,7 @@ public class KafkaProducerConfig {
     }
 
     @Bean
+    @SuppressWarnings({"deprecation", "removal"})
     public ProducerFactory<String, OrderEvent> orderEventProducerFactory(ObjectMapper objectMapper) {
         Map<String, Object> configProps = new HashMap<>();
         configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
@@ -38,14 +39,14 @@ public class KafkaProducerConfig {
         jsonSerializer.setAddTypeInfo(false);
 
         return new DefaultKafkaProducerFactory<>(
-            configProps,
-            new StringSerializer(),
-            jsonSerializer
-        );
+                configProps,
+                new StringSerializer(),
+                jsonSerializer);
     }
 
     @Bean
-    public KafkaTemplate<String, OrderEvent> orderEventKafkaTemplate(ProducerFactory<String, OrderEvent> producerFactory) {
+    public KafkaTemplate<String, OrderEvent> orderEventKafkaTemplate(
+            ProducerFactory<String, OrderEvent> producerFactory) {
         return new KafkaTemplate<>(producerFactory);
     }
 }
