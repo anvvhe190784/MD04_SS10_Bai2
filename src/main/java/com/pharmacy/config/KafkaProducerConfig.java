@@ -30,7 +30,7 @@ public class KafkaProducerConfig {
     }
 
     @Bean
-    @SuppressWarnings({"deprecation", "removal"})
+    @SuppressWarnings("deprecation")
     public ProducerFactory<String, OrderEvent> orderEventProducerFactory(ObjectMapper objectMapper) {
         Map<String, Object> configProps = new HashMap<>();
         configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
