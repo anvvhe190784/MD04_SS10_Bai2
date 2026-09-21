@@ -5,7 +5,6 @@ import com.pharmacy.dto.CheckoutResponse;
 import com.pharmacy.event.OrderEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
@@ -17,13 +16,11 @@ import java.util.concurrent.TimeUnit;
 public class OrderProducerService {
 
     private static final Logger log = LoggerFactory.getLogger(OrderProducerService.class);
+    private static final String TOPIC_NAME = "medicine-stock-events";
 
-    private final KafkaTemplate<String, OrderEvent> kafkaTemplate;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
 
-    @Value("${pharmacy.kafka.topics.stock-events:medicine-stock-events}")
-    private String topicName;
-
-    public OrderProducerService(KafkaTemplate<String, OrderEvent> kafkaTemplate) {
+    public OrderProducerService(KafkaTemplate<String, Object> kafkaTemplate) {
         this.kafkaTemplate = kafkaTemplate;
     }
 
@@ -38,21 +35,21 @@ public class OrderProducerService {
         String messageKey = request.medicineId();
 
         try {
-            CompletableFuture<SendResult<String, OrderEvent>> future = kafkaTemplate.send(topicName, messageKey, event);
+            CompletableFuture<SendResult<String, Object>> future = kafkaTemplate.send(TOPIC_NAME, messageKey, event);
 
-            SendResult<String, OrderEvent> sendResult = future.get(5, TimeUnit.SECONDS);
+            SendResult<String, Object> sendResult = future.get(5, TimeUnit.SECONDS);
             int partition = sendResult.getRecordMetadata().partition();
             long offset = sendResult.getRecordMetadata().offset();
 
             log.info(
                     "OrderEvent published successfully: orderId={}, medicineId={}, key={}, topic={}, partition={}, offset={}",
-                    event.orderId(), event.medicineId(), messageKey, topicName, partition, offset);
+                    event.orderId(), event.medicineId(), messageKey, TOPIC_NAME, partition, offset);
 
             return CheckoutResponse.success(
                     event.orderId(),
                     event.medicineId(),
                     event.quantity(),
-                    topicName,
+                    TOPIC_NAME,
                     partition,
                     offset);
         } catch (Exception e) {

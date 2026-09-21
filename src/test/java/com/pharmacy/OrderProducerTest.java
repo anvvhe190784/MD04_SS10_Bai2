@@ -13,7 +13,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -26,14 +25,13 @@ import static org.mockito.Mockito.*;
 class OrderProducerTest {
 
     @Mock
-    private KafkaTemplate<String, OrderEvent> kafkaTemplate;
+    private KafkaTemplate<String, Object> kafkaTemplate;
 
     private OrderProducerService orderProducerService;
 
     @BeforeEach
     void setUp() {
         orderProducerService = new OrderProducerService(kafkaTemplate);
-        ReflectionTestUtils.setField(orderProducerService, "topicName", "medicine-stock-events");
     }
 
     @Test
@@ -43,8 +41,8 @@ class OrderProducerTest {
         RecordMetadata metadata = new RecordMetadata(
                 new TopicPartition("medicine-stock-events", 2),
                 0L, 0, 0L, 0, 0);
-        SendResult<String, OrderEvent> sendResult = new SendResult<>(null, metadata);
-        CompletableFuture<SendResult<String, OrderEvent>> future = CompletableFuture.completedFuture(sendResult);
+        SendResult<String, Object> sendResult = new SendResult<>(null, metadata);
+        CompletableFuture<SendResult<String, Object>> future = CompletableFuture.completedFuture(sendResult);
 
         when(kafkaTemplate.send(eq("medicine-stock-events"), eq("MED-888"), any(OrderEvent.class)))
                 .thenReturn(future);
